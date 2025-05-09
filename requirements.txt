@@ -1,0 +1,100 @@
+# Mon Bot Social Pro
+
+Bot d'automatisation pour réseaux sociaux avec des fonctionnalités avancées et un comportement visant à simuler l'interaction humaine.
+
+**AVERTISSEMENT : L'utilisation de bots d'automatisation peut enfreindre les Conditions d'Utilisation de nombreuses plateformes de réseaux sociaux et entraîner des restrictions de compte, des suspensions, voire des bannissements. Utilisez ce logiciel à vos propres risques et avec une extrême prudence. Ce projet est fourni à des fins éducatives et d'exploration technique.**
+
+## Fonctionnalités Principales
+
+*   **Gestion des Actions :** Auto-Follow, Auto-Unfollow, Auto-Like, Auto-Comment, Auto-View Stories, Auto-Accept (Follow Requests), Auto-DM (après follow).
+*   **Collecte de Cibles :** Collecte d'utilisateurs basée sur les hashtags (logique de scraping username simulée).
+*   **Humanisation :**
+    *   Délais aléatoires configurables entre les actions.
+    *   Pauses occasionnelles (grosses pauses) après un certain nombre d'actions.
+    *   Heures d'activité configurables (avec adaptation basique au fuseau horaire cible).
+    *   Variation dynamique de la vitesse des actions (ralentissement hors plages actives).
+    *   Micro-pauses (distractions) aléatoires.
+    *   Simulation de fatigue cognitive (allongement des micro-pauses).
+    *   Visionnage partiel des stories.
+    *   Simulation de déconnexion réseau.
+    *   Rotation basique d'User-Agent (au démarrage du navigateur).
+*   **Filtres Avancés :**
+    *   **Pour Follow :** Nombre de posts, followers, following, ratio follower/following, date du dernier post, mots-clés bio (inclus/exclus), type de profil (business/perso), doit avoir story active, sans photo de profil, gestion des profils privés, exclusion des followers actuels et de ceux déjà suivis.
+    *   **Pour Unfollow :** Ancienneté du suivi, ne pas unfollow ceux qui suivent en retour (vérification réelle), inactivité de l'utilisateur (basée sur le dernier post), ne pas unfollow si ratio followers/following "sain", ne pas unfollow comptes populaires (par nb de followers), Whitelist.
+    *   **Pour Like/Comment :** Mots-clés dans la légende (inclus/exclus), éviter posts sponsorisés (Like).
+*   **Contrôles Utilisateur :**
+    *   Liste d'Exclusion (globale).
+    *   Whitelist (pour protection Unfollow).
+    *   Limite de collecte d'utilisateurs par tâche.
+*   **Gestion des Données :**
+    *   Configuration des paramètres via UI et sauvegarde en `settings.json`.
+    *   Base de données SQLite (`bot_data.db`) pour :
+        *   Statistiques d'actions quotidiennes.
+        *   Utilisateurs suivis par le bot (avec date et statut).
+        *   Posts likés et commentés (avec leurs counts au moment de l'action).
+        *   Utilisateurs dont les stories ont été vues.
+    *   Listes (Exclusion, Whitelist, Proxies, Nouveaux Followers Traités) en fichiers JSON séparés.
+*   **Interface Utilisateur (PyQt6) :**
+    *   Onglets dédiés pour chaque fonctionnalité et pour les paramètres.
+    *   Affichage des utilisateurs collectés dans une table (avec sauvegarde/chargement/copie).
+    *   Tableau de bord simple pour les statistiques d'actions.
+    *   Indicateurs de statut pour les tâches en cours.
+    *   Logging centralisé visible dans l'UI et dans un fichier.
+*   **Support Proxy :** Gestion d'une liste de proxies avec support de l'authentification.
+*   **Gestion des Blocages :** Détection basique des messages de blocage et mise en cooldown.
+
+## Prérequis
+
+*   Python 3.8+
+*   Google Chrome installé
+*   (Sur Linux) `python3-venv` pour la création d'environnements virtuels.
+*   Les autres dépendances sont listées dans `requirements.txt`.
+
+## Installation (Exemple pour Linux via `setup.sh`)
+
+1.  **Télécharger le projet :**
+    *   Soit en clonant le dépôt Git (si vous l'avez mis sur une plateforme comme GitHub) :
+        ```bash
+        git clone URL_DE_VOTRE_DEPOT
+        cd nom_du_dossier_du_projet
+        ```
+    *   Soit en téléchargeant et décompressant l'archive du projet.
+2.  **Configurer `setup.sh` (si besoin) :**
+    *   Assurez-vous que les variables comme `GIT_REPO_URL` (si clonage) ou `ARCHIVE_URL` (si téléchargement d'archive) sont correctement définies au début du script `setup.sh`.
+    *   Par défaut, le script tente d'installer l'application dans `~/mon_bot_social`. Modifiez `INSTALL_PATH` si désiré.
+3.  **Rendre le script d'installation exécutable :**
+    ```bash
+    chmod +x setup.sh
+    ```
+4.  **Exécuter le script d'installation :**
+    ```bash
+    ./setup.sh
+    ```
+    Ce script va :
+    *   Vérifier les dépendances système de base.
+    *   Télécharger/copier le code source dans le chemin d'installation.
+    *   Créer un environnement virtuel Python.
+    *   Installer les dépendances Python depuis `requirements.txt` (y compris `webdriver-manager`).
+    *   Créer un script de lancement `run_bot.sh`.
+    *   Optionnellement, créer une entrée de bureau.
+5.  **Modification Importante de `automation_engine/browser_handler.py` (si pas déjà fait dans le code source) :**
+    Le script `setup.sh` installe `webdriver-manager`. Pour l'utiliser, assurez-vous que dans `automation_engine/browser_handler.py`, la méthode `start_browser()` utilise `ChromeDriverManager().install()` :
+    ```python
+    # Au début du fichier automation_engine/browser_handler.py:
+    # from selenium.webdriver.chrome.service import Service as ChromeService
+    # from webdriver_manager.chrome import ChromeDriverManager 
+    # ...
+    # Dans la méthode start_browser():
+    # try:
+    #     self.logger.info("Installation/MàJ ChromeDriver via webdriver-manager...")
+    #     service = ChromeService(ChromeDriverManager().install()) # Ligne importante
+    #     self.driver = webdriver.Chrome(service=service, options=chrome_options)
+    # ...
+    ```
+
+## Lancement de l'Application
+
+Après une installation réussie via `setup.sh` :
+```bash
+cd chemin_vers_votre_installation # Ex: cd ~/mon_bot_social
+./run_bot.sh
